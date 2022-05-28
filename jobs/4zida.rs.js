@@ -1,9 +1,11 @@
 'use strict'
 // const fastify = require('fastify')
 const axios = require('axios')
-const { createClient } = require('@supabase/supabase-js')
+const { supabaseClient, fetchFromDB } = require('../libs/supabase')
+const logger = require('node-color-log')
+const { sendPost } = require('../libs/telegraf')
 
-const supabase = createClient('https://nmosohgtulqkruoiqfdv.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tb3NvaGd0dWxxa3J1b2lxZmR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2NTM0MDQ0MzIsImV4cCI6MTk2ODk4MDQzMn0.lCuO66dotUj1geSDB8ZigvLf0HpVjRb-7nP3LAPY2os')
+logger.setDate(() => (new Date()).toLocaleTimeString())
 
 const getCityLink = (city) => {
   // https://api.4zida.rs/v6/search/apartments?for=rent&sort=createdAtDesc&page=1&placeIds%5B%5D=1
@@ -16,50 +18,49 @@ const getApartmentLink = (id) => {
 }
 
 const start = async () => {
-  const { data } = await axios.get(getCityLink(1))
-  const adsIds = data.ads.map(ad => ad.id)
-  const idsEqArr = adsIds.map(id => `sid.eq.${id}`)
-  const idsEqAString = idsEqArr.join(',')
+  const { data: parsedData } = await axios.get(getCityLink(1))
+  const sourceIds = parsedData.ads.map(ad => ad.id)
+  const idsEqAString = sourceIds.map(id => `sid.eq.${id}`).join(',')
 
-  const dbResult = await supabase
-    .from('apartments')
-    .select()
-    .or(idsEqAString)
+  const dbResult = await fetchFromDB('apartments', 'sid', idsEqAString)
   const dbSids = dbResult.data?.map(item => item.sid)
-  console.log(new Date().toLocaleTimeString())
 
-  for (let item of data.ads) {
-    if (!dbSids.includes(item.id)) {
-      console.info('NEW', item.id)
-      try {
-        const { data } = await axios.get(getApartmentLink(item.id))
+  const newApartmentsIds = sourceIds.filter(id => !dbSids.includes(id))
 
-        if (data) {
-          await supabase
-            .from('apartments')
-            .insert([
-              { 
-                sid: data.id,
-                source: '4zida.rs',
-                type: data.type,
-                city_id: data.cityId,
-                created_at_source: data.createdAt,
-                price: data.price,
-                m2: data.m2,
-                image: data.images?.[0]?.adDetails?.['1920x1080_fit_0_webp'] || data.images?.[0]?.adDetails?.['500x400_fit_0_webp'] || item.image?.search?.['380x0_fill_0_webp'],
-                address: data.address,
-                url_source: data.url,
-                desc: data.desc,
-                origin: data
-              }
-            ])
-        }
-      } catch (error) {
-        console.error(error)
-      }
-    } else {
-      console.warn('OLD')
-    }
+  if (!newApartmentsIds?.length) {
+    logger.warn('Nothing to send');
+    return
+  }
+
+  let apartments
+  await axios.all(newApartmentsIds.map((apartmentId) => axios.get(getApartmentLink(apartmentId))))
+    .then(response => apartments = response.map(result => result.data))  
+
+  const insertData = apartments.map(apartment => ({
+    sid: apartment.id,
+    source: '4zida.rs',
+    type: apartment.type,
+    city_id: apartment.cityId,
+    created_at_source: apartment.createdAt,
+    price: apartment.price,
+    m2: apartment.m2,
+    image: apartment.images?.[0]?.adDetails?.['1920x1080_fit_0_jpeg'] || apartment.images?.[0]?.adDetails?.['500x400_fit_0_jpeg'] || apartment.image?.search?.['380x0_fill_0_jpeg'],
+    address: apartment.address,
+    url_source: apartment.url,
+    desc: apartment.desc,
+    origin: apartment,
+  }))
+
+  await supabaseClient
+    .from('apartments')
+    .insert(insertData)
+
+  logger.success(`Added new apartments from 4zida.rs: ${insertData?.length}`);
+
+  if (!insertData?.length) return 
+
+  for (let post of insertData) {
+    await sendPost(16867973, post)
   }
 }
 

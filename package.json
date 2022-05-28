@@ -22,7 +22,10 @@
     "bree": "^8.0.3",
     "fastify": "^3.0.0",
     "fastify-cli": "^3.1.0",
-    "fastify-plugin": "^3.0.0"
+    "fastify-plugin": "^3.0.0",
+    "node-color-log": "^9.0.0",
+    "sharp": "^0.30.5",
+    "telegraf": "^4.8.2"
   },
   "devDependencies": {
     "tap": "^16.1.0"
