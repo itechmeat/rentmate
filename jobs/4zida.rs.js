@@ -1,9 +1,9 @@
 'use strict'
-// const fastify = require('fastify')
 const axios = require('axios')
-const { supabaseClient, fetchFromDB } = require('../libs/supabase')
+const { supabaseClient, fetchFromDB, fetchData } = require('../libs/supabase')
 const logger = require('node-color-log')
 const { sendPost } = require('../libs/telegraf')
+const { searchFilterByData } = require('../search/filter')
 
 logger.setDate(() => (new Date()).toLocaleTimeString())
 
@@ -28,7 +28,7 @@ const start = async () => {
   const newApartmentsIds = sourceIds.filter(id => !dbSids.includes(id))
 
   if (!newApartmentsIds?.length) {
-    logger.warn('Nothing to send');
+    logger.warn('Nothing to save');
     return
   }
 
@@ -36,31 +36,83 @@ const start = async () => {
   await axios.all(newApartmentsIds.map((apartmentId) => axios.get(getApartmentLink(apartmentId))))
     .then(response => apartments = response.map(result => result.data))  
 
+  const { data: countries } = await fetchData('countries')
+  const { data: cities } = await fetchData('cities')
+  const { data: currancies } = await fetchData('currancies')
+  const { data: categories } = await fetchData('categories')
+  const { data: sites } = await fetchData('sites')
+  
+  const findForeignId = (table, value, column = 'name') => table?.find(item => item[column] === value)?.id
+
   const insertData = apartments.map(apartment => ({
     sid: apartment.id,
-    source: '4zida.rs',
-    type: apartment.type,
-    city_id: apartment.cityId,
-    created_at_source: apartment.createdAt,
+    categoryId: findForeignId(categories, 'apartments'),
+    siteId: findForeignId(sites, '4zida.rs'),
+    countryId: findForeignId(countries, 'serbia', 'slug'),
+    cityId: findForeignId(cities, apartment.cityId, 's4zidaId'),
+    currancyId: findForeignId(currancies, 'EUR', 'abbr'),
+    createdAtSite: apartment.createdAt,
     price: apartment.price,
     m2: apartment.m2,
     image: apartment.images?.[0]?.adDetails?.['1920x1080_fit_0_jpeg'] || apartment.images?.[0]?.adDetails?.['500x400_fit_0_jpeg'] || apartment.image?.search?.['380x0_fill_0_jpeg'],
     address: apartment.address,
-    url_source: apartment.url,
+    urlPage: apartment.url,
     desc: apartment.desc,
     origin: apartment,
   }))
-
-  await supabaseClient
+  
+  const test2 = await supabaseClient
     .from('apartments')
     .insert(insertData)
 
   logger.success(`Added new apartments from 4zida.rs: ${insertData?.length}`);
 
-  if (!insertData?.length) return 
+  // const { data: filters } = await fetchData('filters')
 
-  for (let post of insertData) {
-    await sendPost(16867973, post)
+  if (!insertData?.length) return
+  
+  const box = []
+
+  for (let apartment of insertData) {
+    const filters = await searchFilterByData({
+      cityId: apartment.cityId,
+      price: apartment.price,
+      m2: apartment.m2, 
+    })
+    if (filters?.results?.length) {
+      filters.results.forEach(filterItem => {
+        const filterIndex = box.findIndex(boxItem => (
+          boxItem.chatId === filterItem.chatId &&
+          boxItem.apartment.sid === apartment.sid
+        ))
+        if (filterIndex === -1 && apartment.cityId && filterItem.isActive) {
+          box.push({
+            chatId: filterItem.chatId,
+            apartment,
+          })
+        }
+      })
+    }
+  }
+  // console.log('box', box, box.length)
+
+  // insertData.forEach(async apartment => {
+  //   const filters = await searchFilterByData({
+  //     cityId: apartment.cityId,
+  //     price: apartment.price,
+  //     m2: apartment.m2, 
+  //   })
+  //   console.log('filters', filters?.results?.length, {
+  //     cityId: apartment.cityId,
+  //     price: apartment.price,
+  //     m2: apartment.m2, 
+  //   })
+  // })
+
+  // return
+
+  for (let post of box) {
+    await sendPost(post.chatId, post.apartment)
   }
 }
 

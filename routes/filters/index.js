@@ -24,8 +24,7 @@ module.exports = async function (fastify, opts) {
 
   fastify.get('/data/', async function (request, reply) {
     return await searchFilterByData({
-      country: 'Serbia',
-      city: 2,
+      cityId: 'aa998544-0d0b-4936-a574-3a46c333c1ee',
       price: 350,
       m2: 60,
     })

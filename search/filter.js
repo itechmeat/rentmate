@@ -1,7 +1,4 @@
 const { supabaseClient } = require('../libs/supabase')
-const telegramBot = require('../libs/telegraf')
-const { examplePost } = require('../libs/texts')
-
 
 const searchByFilter = async (params) => {
   let query = supabaseClient
@@ -28,21 +25,12 @@ const searchByFilter = async (params) => {
 }
 
 const searchFilterByData = async (params) => {
-  telegramBot.telegram.sendPhoto(
-    16867973,
-    'https://m1.spitogatos.gr/233425077_1600x1200.jpg?v=20130730',
-    {
-      caption: examplePost,
-      parse_mode: 'HTML',
-    }
-  )
-
   let query = supabaseClient
     .from('filters')
     .select()
 
-  if (params.city) {
-    query = query.eq('city', params.city)
+  if (params.cityId) {
+    query = query.eq('cityId', params.cityId)
   }
   if (params.price) {
     query = query.lte('priceFrom', params.price)

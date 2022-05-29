@@ -1,20 +1,26 @@
 const { Telegraf } = require('telegraf')
 const { generateText, postsControls } = require('../libs/texts')
 
+// https://core.telegram.org/bots/api#available-methods
 const telegramBot = new Telegraf('5338129871:AAFIESunhLTKXny1hCONRe4lqu3AtSPpvBM')
 
-const sendPost = async (channel, message) => {
+const sendPost = async (chatId, message) => {
+  let desc = message.desc
+  if (desc?.length > 800) {
+    desc = desc.slice(0, 800) + ' ...'
+  }
+
   await telegramBot.telegram.sendPhoto(
-    channel,
+    chatId,
     message.image,
     {
       caption: generateText({
-        type: message.type,
+        category: message.category,
         price: message.price,
         address: message.address,
         m2: message.m2,
-        desc: message.desc,
-        url: message.url_source,
+        desc,
+        url: message.urlPage,
       }),
       parse_mode: 'HTML',
       reply_markup: postsControls,

@@ -17,7 +17,7 @@ const generateText = (data) => {
 <b>Apartment for rent in Serbia 🏠</b>
 <b>€${data.price}</b>/month
 
-• <i>📍 Location:</i> <b>${data.address}</b>
+• <i>📍 Location:</i> <b>${data.address || '---'}</b>
 • <i>📐 Size:</i> <b>${data.m2} m2</b>
 
 ${data.desc}
