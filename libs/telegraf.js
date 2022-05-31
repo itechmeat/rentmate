@@ -41,7 +41,7 @@ const sendPost = async (chatId, message) => {
         url: message.urlPage,
       }),
       parse_mode: 'HTML',
-      reply_markup: postsControls,
+      // reply_markup: postsControls,
     }
   )
 }
