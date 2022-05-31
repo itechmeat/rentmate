@@ -3,6 +3,7 @@
 const path = require('path')
 const AutoLoad = require('@fastify/autoload')
 const Bree = require('bree')
+const { startDialog } = require('./libs/telegraf')
 
 module.exports = async function (fastify, opts) {
   // Place here your custom code!
@@ -36,4 +37,6 @@ module.exports = async function (fastify, opts) {
   })
 
   bree.start()
+
+  startDialog()
 }
