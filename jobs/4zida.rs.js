@@ -38,7 +38,6 @@ const start = async () => {
   
   const commonData = await getCommonData()  
   const { countries, cities, currancies, categories, sites } = commonData
-  console.log(countries, cities, currancies, categories, sites)
 
   const findForeignId = (table, value, column = 'name') => table?.find(item => item[column] === value)?.id
 
