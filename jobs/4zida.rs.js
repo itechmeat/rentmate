@@ -1,15 +1,15 @@
 'use strict'
 const axios = require('axios')
-const { supabaseClient, fetchFromDB, fetchData } = require('../libs/supabase')
+const { supabaseClient, getCommonData, fetchFromDB, fetchData } = require('../libs/supabase')
 const logger = require('node-color-log')
 const { sendPost } = require('../libs/telegraf')
 const { searchFilterByData } = require('../search/filter')
 
 logger.setDate(() => (new Date()).toLocaleTimeString())
 
-const getCityLink = (city) => {
+const getCityLink = () => {
   // https://api.4zida.rs/v6/search/apartments?for=rent&sort=createdAtDesc&page=1&placeIds%5B%5D=1
-  return `https://api.4zida.rs/v6/search/apartments?for=rent&sort=createdAtDesc&page=1&placeIds%5B%5D=${city}`
+  return `https://api.4zida.rs/v6/search/apartments?for=rent&sort=createdAtDesc&page=1`
 }
 
 const getApartmentLink = (id) => {
@@ -18,7 +18,7 @@ const getApartmentLink = (id) => {
 }
 
 const start = async () => {
-  const { data: parsedData } = await axios.get(getCityLink(1))
+  const { data: parsedData } = await axios.get(getCityLink())
   const sourceIds = parsedData.ads.map(ad => ad.id)
   const idsEqAString = sourceIds.map(id => `sid.eq.${id}`).join(',')
 
@@ -35,13 +35,11 @@ const start = async () => {
   let apartments
   await axios.all(newApartmentsIds.map((apartmentId) => axios.get(getApartmentLink(apartmentId))))
     .then(response => apartments = response.map(result => result.data))  
-
-  const { data: countries } = await fetchData('countries')
-  const { data: cities } = await fetchData('cities')
-  const { data: currancies } = await fetchData('currancies')
-  const { data: categories } = await fetchData('categories')
-  const { data: sites } = await fetchData('sites')
   
+  const commonData = await getCommonData()  
+  const { countries, cities, currancies, categories, sites } = commonData
+  console.log(countries, cities, currancies, categories, sites)
+
   const findForeignId = (table, value, column = 'name') => table?.find(item => item[column] === value)?.id
 
   const insertData = apartments.map(apartment => ({
@@ -61,10 +59,6 @@ const start = async () => {
     origin: apartment,
   }))
   
-  const test2 = await supabaseClient
-    .from('apartments')
-    .insert(insertData)
-
   logger.success(`Added new apartments from 4zida.rs: ${insertData?.length}`);
 
   // const { data: filters } = await fetchData('filters')

@@ -1,8 +1,9 @@
+require('dotenv').config()
 const { Telegraf } = require('telegraf')
 const { generateText, postsControls } = require('../libs/texts')
 
 // https://core.telegram.org/bots/api#available-methods
-const telegramBot = new Telegraf('5338129871:AAFIESunhLTKXny1hCONRe4lqu3AtSPpvBM')
+const telegramBot = new Telegraf(process.env.TELEGRAM_TOKEN)
 
 const startDialog = () => {
   const bot = telegramBot
