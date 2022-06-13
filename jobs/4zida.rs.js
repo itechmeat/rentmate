@@ -57,17 +57,22 @@ const start = async () => {
     desc: apartment.desc,
     origin: apartment,
   }))
-  
-  await supabaseClient
-    .from('apartments')
-    .insert(insertData)
-
-  logger.success(`Added new apartments from 4zida.rs: ${insertData?.length}`);
-
-  // const { data: filters } = await fetchData('filters')
 
   if (!insertData?.length) return
   
+  const savingResult = await supabaseClient
+    .from('apartments')
+    .insert(insertData)
+
+  if (savingResult.error) {
+    logger.error(savingResult.error?.message)
+    return
+  }
+  
+  logger.success(`Added new apartments from 4zida.rs: ${insertData.length}`)
+
+  // const { data: filters } = await fetchData('filters')
+
   const box = []
 
   for (let apartment of insertData) {
