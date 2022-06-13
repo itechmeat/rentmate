@@ -58,6 +58,10 @@ const start = async () => {
     origin: apartment,
   }))
   
+  await supabaseClient
+    .from('apartments')
+    .insert(insertData)
+
   logger.success(`Added new apartments from 4zida.rs: ${insertData?.length}`);
 
   // const { data: filters } = await fetchData('filters')
