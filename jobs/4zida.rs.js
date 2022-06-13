@@ -1,11 +1,9 @@
 'use strict'
 const axios = require('axios')
 const { supabaseClient, getCommonData, fetchFromDB, fetchData } = require('../libs/supabase')
-const logger = require('node-color-log')
-const { sendPost } = require('../libs/telegraf')
+const logger = require('../libs/logger')
+const { sendPost } = require('../libs/telegraf/posts')
 const { searchFilterByData } = require('../search/filter')
-
-logger.setDate(() => (new Date()).toLocaleTimeString())
 
 const getCityLink = () => {
   // https://api.4zida.rs/v6/search/apartments?for=rent&sort=createdAtDesc&page=1&placeIds%5B%5D=1

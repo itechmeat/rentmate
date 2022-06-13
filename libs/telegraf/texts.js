@@ -1,17 +1,3 @@
-const examplePost = `
-<b>Apartment for rent in Novi Sad 🏠</b>
-<b>€2,000</b>/month <i>(€16/sqm)</i>
-
-• <i>📍 Location:</i> <b>South Backa District</b>
-• <i>📐 Size:</i> <b>122 m2</b>
-• <i>🛏 Bedrooms:</i> <b>3</b>
-• <i>🛁 Bathrooms:</i> <b>1</b>
-
-Moj otac izdaje dvosoban stan (60m2) na Bul.Oslobodjenja 37, 5 ti sprat od 10( ima lift) na duzi vremenski period, nije pet friendly. Slobodan od 1.06
-
-<a href="https://codebeautify.org/markdown-editor">Show more</a>
-`
-
 const generateText = (data) => {
   return `
 <b>Apartment for rent in Serbia 🏠</b>
@@ -25,16 +11,6 @@ ${data.desc}
 <a href="${data.url}">Show more</a>
   `
 }
-
-const postsControls = JSON.stringify({
-  inline_keyboard: [
-    [
-      { text: '👍', callback_data: '/show' },
-      { text: '👎', callback_data: '/show' },
-      { text: 'More ➡️', callback_data: '/show' },
-    ]
-  ]
-})
 
 const getFilterText = (rentFilter) => {
   let type = 'something'
@@ -68,4 +44,4 @@ const getFilterText = (rentFilter) => {
   return result
 }
 
-module.exports = { examplePost, postsControls, getFilterText, generateText }
+module.exports = { getFilterText, generateText }
