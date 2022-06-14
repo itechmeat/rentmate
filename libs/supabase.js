@@ -1,6 +1,6 @@
 require('dotenv').config()
 const { createClient } = require('@supabase/supabase-js')
-const { connectToRedis, setToRedis, getFromRedis } = require('../libs/redis')
+const { redisConect, redisDisconnect, setToRedis, getFromRedis } = require('../libs/redis')
 // const NodeCache = require( "node-cache" )
 // const resourcesCache = new NodeCache()
 
@@ -35,14 +35,16 @@ const fetchCommonData = async () => {
 }
 
 const saveCommonData = async () => {
-  connectToRedis()
+  await redisConect()
   const data = await fetchCommonData()
   await setToRedis('settings', JSON.stringify(data))
+  await redisDisconnect()
 }
 
 const getCommonData = async () => {
-  connectToRedis()
+  await redisConect()
   const settings = await getFromRedis('settings')
+  await redisDisconnect()
   return JSON.parse(settings)
 }
 

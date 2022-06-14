@@ -66,7 +66,7 @@ const start = async () => {
     logger.error(savingResult.error?.message)
     return
   }
-  
+
   logger.success(`Added new apartments from 4zida.rs: ${insertData.length}`)
 
   // const { data: filters } = await fetchData('filters')
