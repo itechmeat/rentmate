@@ -1,3 +1,19 @@
+const enLang = require('../../locales/en')
+const ruLang = require('../../locales/ru')
+const rsLang = require('../../locales/rs')
+const bgLang = require('../../locales/bg')
+
+const translates = {
+  en: enLang,
+  ru: ruLang,
+  rs: rsLang,
+  bg: bgLang,
+}
+
+const t = (lang, text) => {
+  return translates[lang][text]
+}
+
 const generateText = (data) => {
   return `
 <b>Apartment for rent in Serbia 🏠</b>
@@ -44,4 +60,4 @@ const getFilterText = (rentFilter) => {
   return result
 }
 
-module.exports = { getFilterText, generateText }
+module.exports = { t, getFilterText, generateText }

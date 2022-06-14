@@ -15,7 +15,7 @@ const handleUser = async (message) => {
   const foundUser = await getUser(from.username)
 
   // @TODO: make user changeable
-  if (foundUser.error || foundUser.body[0]) return
+  if (foundUser.error || foundUser.body[0]) return foundUser?.data?.[0]
 
   const user = {
     username: from.username,
@@ -35,6 +35,8 @@ const handleUser = async (message) => {
   }
 
   logger.success(`Added new user: ${user.firstName} ${user.lastName} aka ${user.username}`)
+
+  return result?.data?.[0]
 }
 
 module.exports = { handleUser }
