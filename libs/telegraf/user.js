@@ -21,7 +21,7 @@ const handleUser = async (message) => {
     username: from.username,
     firstName: from.first_name,
     lastName: from.last_name,
-    lang: from.language_code || 'en',
+    clientLang: from.language_code,
     chatId: from.id,
   }
 

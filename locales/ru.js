@@ -1,5 +1,6 @@
 const dictionary = {
-  "start": "Привет"
+  "start": "Привет",
+  "chooseLang": "Какой вы предпочитаете язык?",
 }
 
 module.exports = dictionary

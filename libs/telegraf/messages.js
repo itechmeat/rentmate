@@ -1,32 +1,20 @@
 // const { text } = require("telegraf/typings/button")
+const { languageSelector } = require('./options')
 const { t } = require('./texts')
-
-const languageSelector = [
-  {
-    flag: '🇬🇧',
-    lang: 'en',
-    name: 'English',
-  },
-  {
-    flag: '🇷🇺',
-    lang: 'ru',
-    name: 'Russian',
-  },
-  {
-    flag: '🇷🇸',
-    lang: 'rs',
-    name: 'Serbian',
-  },
-  {
-    flag: '🇧🇬',
-    lang: 'bg',
-    name: 'Bulgarian',
-  },
-]
+const { commands, handleCommand } = require('./commands')
 
 const handleMessage = (message, user) => {
-  const lang = user?.lang || languageSelector[0].lang
+  if (!message) return
+  const lang = user?.clientLang || languageSelector()[0].lang
+  const text = message.text
+  if (!text) return
   console.log('translates', t(lang, 'start'))
+
+  const commandsNames = commands.map(command => command.command)
+  if (commandsNames.includes(text)) {
+    handleCommand(text, lang, user)
+    return
+  }
 }
 
 module.exports = { handleMessage }
