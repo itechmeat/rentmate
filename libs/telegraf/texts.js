@@ -10,7 +10,7 @@ const translates = {
   bg: bgLang,
 }
 
-const t = (lang, text) => {
+const t = (lang = 'en', text) => {
   return translates[lang][text]
 }
 

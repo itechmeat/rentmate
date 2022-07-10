@@ -11,7 +11,7 @@ const buildControls = (controls, rows) => {
     }
   }
   
-  return { reply_markup: JSON.stringify({ inline_keyboard: result }) }
+  return result
 }
 
 const postsControls = JSON.stringify({

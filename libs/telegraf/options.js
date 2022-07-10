@@ -1,28 +1,28 @@
 // const { text } = require("telegraf/typings/button")
-const languageSelector = (lang) => {
-  const list = [
-    {
-      flag: '🇬🇧',
-      lang: 'en',
-      name: 'English',
-    },
-    {
-      flag: '🇷🇺',
-      lang: 'ru',
-      name: 'Русский',
-    },
-    {
-      flag: '🇷🇸',
-      lang: 'rs',
-      name: 'Srpski',
-    },
-    {
-      flag: '🇧🇬',
-      lang: 'bg',
-      name: 'Български',
-    },
-  ]
+const list = [
+  {
+    flag: '🇬🇧',
+    lang: 'en',
+    name: 'English',
+  },
+  {
+    flag: '🇷🇺',
+    lang: 'ru',
+    name: 'Русский',
+  },
+  {
+    flag: '🇷🇸',
+    lang: 'rs',
+    name: 'Srpski',
+  },
+  {
+    flag: '🇧🇬',
+    lang: 'bg',
+    name: 'Български',
+  },
+]
 
+const languageSelector = (lang) => {
   if (!lang) return list
 
   const firstLangIndex = list.findIndex(item => item.lang === lang)
@@ -30,12 +30,18 @@ const languageSelector = (lang) => {
   if (firstLangIndex === -1) return list
 
   const firstLang = list[firstLangIndex]
-  list.splice(firstLangIndex, 1)
+  const newList = [...list]
+  newList.splice(firstLangIndex, 1)
 
   return [
     firstLang,
-    ...list
+    ...newList
   ]
 }
 
-module.exports = { languageSelector }
+const getLanguageByLang = (lang) => {
+  const result = list.find(item => item.lang === lang)
+  return result
+}
+
+module.exports = { languageSelector, getLanguageByLang }

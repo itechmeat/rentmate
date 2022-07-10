@@ -1,15 +1,16 @@
 require('dotenv').config()
 const { bot } = require('./bot')
-const { setCommands } = require('./commands')
+const { setMenuCommands, setOtherCommands } = require('./commands')
 const { handleUser } = require('./user')
 const { handleMessage } = require('./messages')
 
-setCommands()
+setMenuCommands()
+setOtherCommands()
 
 const startDialog = async () => {
   bot.on('text', async (ctx) => {
     const user = await handleUser(ctx?.message)
-    handleMessage(ctx?.message, user)
+    handleMessage(ctx, user)
   })
   
   bot.launch()

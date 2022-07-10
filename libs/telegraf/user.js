@@ -14,8 +14,7 @@ const handleUser = async (message) => {
 
   const foundUser = await getUser(from.username)
 
-  // @TODO: make user changeable
-  if (foundUser.error || foundUser.body[0]) return foundUser?.data?.[0]
+  if (foundUser.error || foundUser.body?.[0]) return foundUser?.data?.[0]
 
   const user = {
     username: from.username,
@@ -39,4 +38,27 @@ const handleUser = async (message) => {
   return result?.data?.[0]
 }
 
-module.exports = { handleUser }
+const updateUserSettings = async (username, options) => {
+  console.log('updateUserSettings', username, options)
+  if (!username || !options) return
+  const foundUser = await getUser(username)
+  const response = await supabaseClient
+    .from('users')
+    .upsert(
+      {
+        ...foundUser.body[0],
+        settings: {
+          ...foundUser.body[0].settings,
+          ...options,
+        }
+      }
+    )
+  return response
+}
+
+const getUserLang = async (ctx) => {
+  const user = await handleUser(ctx?.message)
+  return user?.settings?.language_code ||  user?.clientLang || 'en'
+}
+
+module.exports = { handleUser, updateUserSettings, getUserLang }
